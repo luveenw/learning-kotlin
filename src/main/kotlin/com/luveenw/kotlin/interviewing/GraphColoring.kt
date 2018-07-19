@@ -7,28 +7,23 @@ import java.util.*
 import java.util.stream.Collectors
 
 fun main(args: Array<String>) {
-    val graphMap = ListMultimapBuilder.hashKeys().arrayListValues().build<Node, Node>()
     val a = Node("a")
     val b = Node("b")
     val c = Node("c")
     val d = Node("d")
+    val graph = Graph()
 
-    graphMap.putAll(a, listOf(b, c))
-    graphMap.putAll(b, listOf(a, c, d))
-    graphMap.putAll(c, listOf(a, b))
-    graphMap.putAll(d, listOf(b))
+    graph.addEdge(a, b)
+    graph.addEdge(a, c)
+    graph.addEdge(b, a)
+    graph.addEdge(b, c)
+    graph.addEdge(b, d)
+    graph.addEdge(c, a)
+    graph.addEdge(c, b)
+    graph.addEdge(d, b)
 
-    val graph = Graph(graphMap)
     colorGraph(graph)
-
-    graph.nodes.forEach {
-        val neighbors = graph.neighborsOf(it)
-                .stream()
-                .map(Node::toString)
-                .collect(Collectors.joining(", "))
-
-        println("$it -> $neighbors")
-    }
+    graph.print()
 }
 
 fun colorGraph(g: Graph) {
@@ -61,10 +56,27 @@ private fun colorNode(node: Node, neighbors: List<Node>) {
 }
 
 data class Graph (val adjacencyMap: ListMultimap<Node, Node>) {
+    constructor() : this(ListMultimapBuilder.hashKeys().arrayListValues().build<Node, Node>())
+
     val nodes: Set<Node>
         get() = this.adjacencyMap.keySet()
 
+    fun addEdge(a: Node, b: Node) {
+        this.adjacencyMap.put(a, b)
+    }
+
     fun neighborsOf(n: Node): List<Node> = this.adjacencyMap.get(n)
+
+    fun print() {
+        this.nodes.forEach {
+            val neighbors = this.neighborsOf(it)
+                    .stream()
+                    .map(Node::toString)
+                    .collect(Collectors.joining(", "))
+
+            println("$it -> $neighbors")
+        }
+    }
 }
 
 data class Node (val label: String, var color: Color? = null) {
